@@ -40,38 +40,38 @@ export const CreateContestForm = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
+    <div className="max-w-3xl mx-auto">
+      <div className="glass-strong rounded-xl shadow-2xl p-8 border border-white/10">
+        <h2 className="text-3xl font-bold mb-8 text-white">
           Contest Configuration
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Info */}
           <div className="grid grid-cols-1 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
                 Contest Title *
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 glass border border-white/20 rounded-lg focus:outline-none focus:border-[var(--aurora-cyan)] text-white placeholder-gray-500 transition-all duration-300"
                 placeholder="e.g., Best Crypto Meme 2024"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
                 Description *
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 glass border border-white/20 rounded-lg focus:outline-none focus:border-[var(--aurora-cyan)] text-white placeholder-gray-500 transition-all duration-300 resize-none"
                 placeholder="Describe your contest theme, rules, and any special requirements..."
                 required
               />
@@ -81,7 +81,7 @@ export const CreateContestForm = () => {
           {/* Contest Settings */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
                 Voting Period (Days)
               </label>
               <input
@@ -90,12 +90,12 @@ export const CreateContestForm = () => {
                 max="30"
                 value={votingPeriod}
                 onChange={(e) => setVotingPeriod(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 glass border border-white/20 rounded-lg focus:outline-none focus:border-[var(--aurora-cyan)] text-white transition-all duration-300"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
                 Max Proposals
               </label>
               <input
@@ -104,75 +104,100 @@ export const CreateContestForm = () => {
                 max="1000"
                 value={maxProposals}
                 onChange={(e) => setMaxProposals(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 glass border border-white/20 rounded-lg focus:outline-none focus:border-[var(--aurora-cyan)] text-white transition-all duration-300"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
                 Cost to Propose (ETH)
               </label>
               <input
                 type="text"
                 value={costToPropose}
                 onChange={(e) => setCostToPropose(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 glass border border-white/20 rounded-lg focus:outline-none focus:border-[var(--aurora-cyan)] text-white placeholder-gray-500 transition-all duration-300"
                 placeholder="0.01"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
                 Cost to Vote (ETH)
               </label>
               <input
                 type="text"
                 value={costToVote}
                 onChange={(e) => setCostToVote(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 glass border border-white/20 rounded-lg focus:outline-none focus:border-[var(--aurora-cyan)] text-white placeholder-gray-500 transition-all duration-300"
                 placeholder="0.001"
               />
             </div>
           </div>
 
           {/* Cost Summary */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-2">Cost Summary</h4>
-            <div className="text-sm text-gray-600 space-y-1">
-              <p>• Proposal submission: {costToPropose} ETH</p>
-              <p>• Per vote: {costToVote} ETH</p>
-              <p>• Voting period: {votingPeriod} days</p>
-              <p>• Maximum proposals: {maxProposals}</p>
+          <div className="glass rounded-xl p-6 border border-[var(--aurora-purple)]/30">
+            <h4 className="font-bold text-white mb-4 text-lg flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--aurora-purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              Cost Summary
+            </h4>
+            <div className="text-sm text-gray-300 space-y-2">
+              <p className="flex items-center gap-2">
+                <span className="text-[var(--aurora-cyan)]">•</span>
+                Proposal submission: <span className="font-mono font-bold text-white">{costToPropose} ETH</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="text-[var(--aurora-green)]">•</span>
+                Per vote: <span className="font-mono font-bold text-white">{costToVote} ETH</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="text-[var(--aurora-purple)]">•</span>
+                Voting period: <span className="font-bold text-white">{votingPeriod} days</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="text-[var(--aurora-cyan)]">•</span>
+                Maximum proposals: <span className="font-bold text-white">{maxProposals}</span>
+              </p>
             </div>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            // Update button disabled state and text
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium transition-colors"
+            className="w-full aurora-gradient text-white py-4 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(0,255,136,0.6)]"
           >
             {isLoading
               ? "Creating Contest..."
               : transactionHash
-                ? "Contest Created!"
-                : "Create Contest"}
+                ? "✓ Contest Created!"
+                : "🚀 Create Contest"}
           </button>
 
           {/* Status Messages */}
-
           {transactionHash && (
-            <div className="p-4 bg-green-100 text-green-700 rounded-md">
-              <p className="font-medium">Contest created successfully!</p>
-              <p className="text-sm">Redirecting to contests page...</p>
+            <div className="glass p-6 rounded-xl border border-green-400/50 slide-in-up">
+              <p className="font-bold text-green-400 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Contest created successfully!
+              </p>
+              <p className="text-sm text-gray-300 mt-2">Redirecting to contests page...</p>
             </div>
           )}
 
           {error && (
-            <div className="p-4 bg-red-100 text-red-700 rounded-md">
-              <p className="font-medium">Error creating contest</p>
-              <p className="text-sm">{error}</p>
+            <div className="glass p-6 rounded-xl border border-red-400/50 slide-in-up">
+              <p className="font-bold text-red-400 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Error creating contest
+              </p>
+              <p className="text-sm text-gray-300 mt-2">{error}</p>
             </div>
           )}
         </form>

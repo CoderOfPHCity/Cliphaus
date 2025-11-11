@@ -4,6 +4,7 @@ import "./globals.css";
 import { WalletProvider } from "../components/provider/WalletProvider";
 import { Navigation } from "../components/Navigation";
 import { ContestProvider } from "../hooks/useContestContext";
+import NorthernLights from "../components/NorthernLights";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,10 +31,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <NorthernLights/>
         <WalletProvider>
           <ContestProvider>
             <Navigation />
-            {children}
+            <main className="relative z-10">
+              {children}
+            </main>
           </ContestProvider>
         </WalletProvider>
       </body>
