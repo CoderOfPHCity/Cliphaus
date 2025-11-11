@@ -58,16 +58,16 @@ export default function ContestDetailPage() {
   }, [setCurrentContest]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen pt-16">
+      <div className="container mx-auto px-4 py-12">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-12 slide-in-up">
           <Link
             href="/contests"
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4"
+            className="inline-flex items-center text-[var(--aurora-cyan)] hover:text-[var(--aurora-green)] mb-6 transition-colors group"
           >
             <svg
-              className="w-4 h-4 mr-2"
+              className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -82,86 +82,94 @@ export default function ContestDetailPage() {
             Back to Contests
           </Link>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="glass-strong rounded-xl shadow-2xl p-8 mb-8 border border-white/10">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold text-white mb-4">
                   {mockContest.title}
                 </h1>
-                <p className="text-gray-600">{mockContest.description}</p>
+                <p className="text-gray-300 text-lg leading-relaxed">{mockContest.description}</p>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                Active
+              <span className="px-4 py-2 bg-green-500/20 text-green-300 rounded-full text-sm font-bold border border-green-400/30 backdrop-blur-sm aurora-glow whitespace-nowrap">
+                🔥 Active
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-              <div>
-                <span className="font-medium">Creator:</span>{" "}
-                {mockContest.creator}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+              <div className="glass p-4 rounded-lg border border-white/10">
+                <span className="text-gray-400 block mb-1">Creator</span>
+                <span className="text-white font-mono font-bold">{mockContest.creator}</span>
               </div>
-              <div>
-                <span className="font-medium">Proposals:</span>{" "}
-                {mockContest.proposalCount}
+              <div className="glass p-4 rounded-lg border border-white/10">
+                <span className="text-gray-400 block mb-1">Proposals</span>
+                <span className="text-[var(--aurora-cyan)] font-bold text-2xl">{mockContest.proposalCount}</span>
               </div>
-              <div>
-                <span className="font-medium">Total Votes:</span>{" "}
-                {mockContest.totalVotes}
+              <div className="glass p-4 rounded-lg border border-white/10">
+                <span className="text-gray-400 block mb-1">Total Votes</span>
+                <span className="text-[var(--aurora-green)] font-bold text-2xl">{mockContest.totalVotes}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-6">
+        <div className="flex gap-3 mb-10 overflow-x-auto pb-2">
           <button
             onClick={() => setActiveTab("proposals")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            className={`px-6 py-3 font-bold text-sm rounded-xl transition-all duration-300 whitespace-nowrap ${
               activeTab === "proposals"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "aurora-gradient text-white shadow-lg"
+                : "glass text-gray-300 hover:text-white border border-white/10 hover:border-white/30"
             }`}
           >
-            View Proposals
+            📋 View Proposals
           </button>
           <button
             onClick={() => setActiveTab("submit")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            className={`px-6 py-3 font-bold text-sm rounded-xl transition-all duration-300 whitespace-nowrap ${
               activeTab === "submit"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "aurora-gradient text-white shadow-lg"
+                : "glass text-gray-300 hover:text-white border border-white/10 hover:border-white/30"
             }`}
           >
-            Submit Proposal
+            ✨ Submit Proposal
           </button>
           <button
             onClick={() => setActiveTab("vote")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            className={`px-6 py-3 font-bold text-sm rounded-xl transition-all duration-300 whitespace-nowrap ${
               activeTab === "vote"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "aurora-gradient text-white shadow-lg"
+                : "glass text-gray-300 hover:text-white border border-white/10 hover:border-white/30"
             }`}
           >
-            Vote
+            🗳️ Vote
           </button>
         </div>
 
         {/* Tab Content */}
         {activeTab === "proposals" && (
-          <div className="space-y-4">
-            {mockProposals.map((proposal) => (
-              <ProposalCard key={proposal.id} proposal={proposal} />
+          <div className="space-y-6">
+            {mockProposals.map((proposal, index) => (
+              <div key={proposal.id} style={{ animationDelay: `${index * 0.1}s` }}>
+                <ProposalCard proposal={proposal} />
+              </div>
             ))}
           </div>
         )}
 
-        {activeTab === "submit" && <CreateProposalForm />}
+        {activeTab === "submit" && (
+          <div className="slide-in-up">
+            <CreateProposalForm />
+          </div>
+        )}
 
         {activeTab === "vote" && (
-          <VotingInterface
-            contestAddress={mockContest.address}
-            proposals={mockProposals}
-          />
+          <div className="slide-in-up">
+            <VotingInterface
+              contestAddress={mockContest.address}
+              proposals={mockProposals}
+            />
+          </div>
         )}
       </div>
     </div>

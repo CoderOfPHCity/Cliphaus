@@ -48,9 +48,9 @@ export const ConnectionStatus = () => {
   }, [provider, isConnected]);
 
   const getStatusColor = () => {
-    if (isLoading) return "bg-yellow-500";
-    if (isConnected) return "bg-green-500";
-    return "bg-red-500";
+    if (isLoading) return "bg-yellow-400 animate-pulse";
+    if (isConnected) return "bg-green-400 animate-pulse";
+    return "bg-red-400";
   };
 
   const getStatusText = () => {
@@ -60,11 +60,14 @@ export const ConnectionStatus = () => {
   };
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
-      <span className="text-gray-600">{getStatusText()}</span>
+    <div className="flex items-center gap-3 text-sm glass px-4 py-2 rounded-full border border-white/20">
+      <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor()}`} />
+      <span className="text-white font-semibold">{getStatusText()}</span>
       {isConnected && networkName && (
-        <span className="text-gray-500">• {networkName}</span>
+        <>
+          <span className="text-gray-400">•</span>
+          <span className="text-[var(--aurora-cyan)] font-mono text-xs">{networkName}</span>
+        </>
       )}
     </div>
   );
