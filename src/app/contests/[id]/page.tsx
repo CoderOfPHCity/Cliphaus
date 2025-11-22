@@ -1,7 +1,7 @@
 // src/app/contests/[id]/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { CreateProposalForm } from "../../../components/CreateProposalForm";
@@ -49,6 +49,15 @@ export default function ContestDetailPage() {
   const [activeTab, setActiveTab] = useState<"proposals" | "submit" | "vote">(
     "proposals",
   );
+  const [selectedProposalId, setSelectedProposalId] = useState<number | null>(
+    null,
+  );
+  const voteSectionRef = useRef<HTMLDivElement | null>(null);
+  
+  const truncateAddress = (addr: string) => {
+    if (!addr) return "";
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
 
   const { setCurrentContest } = useContestContext();
 
@@ -56,6 +65,24 @@ export default function ContestDetailPage() {
     // Set the current contest when page loads
     setCurrentContest(mockContest.address);
   }, [setCurrentContest]);
+
+  useEffect(() => {
+    if (activeTab === "vote") {
+      const timeout = setTimeout(() => {
+        voteSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 150);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [activeTab]);
+
+  const handleVoteClick = (proposalId: number) => {
+    setSelectedProposalId(proposalId);
+    setActiveTab("vote");
+  };
 
   return (
     <div className="min-h-screen pt-16">
@@ -98,7 +125,12 @@ export default function ContestDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
               <div className="glass p-4 rounded-lg border border-white/10">
                 <span className="text-gray-400 block mb-1">Creator</span>
-                <span className="text-white font-mono font-bold">{mockContest.creator}</span>
+                <span
+                  className="text-white font-mono font-bold"
+                  title={mockContest.creator}
+                >
+                  {truncateAddress(mockContest.creator)}
+                </span>
               </div>
               <div className="glass p-4 rounded-lg border border-white/10">
                 <span className="text-gray-400 block mb-1">Proposals</span>
@@ -151,7 +183,10 @@ export default function ContestDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {mockProposals.map((proposal, index) => (
               <div key={proposal.id} style={{ animationDelay: `${index * 0.1}s` }}>
-                <ProposalCard proposal={proposal} />
+                <ProposalCard
+                  proposal={proposal}
+                  onVoteClick={() => handleVoteClick(proposal.id)}
+                />
               </div>
             ))}
           </div>
@@ -164,10 +199,11 @@ export default function ContestDetailPage() {
         )}
 
         {activeTab === "vote" && (
-          <div className="slide-in-up">
+          <div className="slide-in-up" ref={voteSectionRef}>
             <VotingInterface
               contestAddress={mockContest.address}
               proposals={mockProposals}
+              initialProposalId={selectedProposalId ?? undefined}
             />
           </div>
         )}

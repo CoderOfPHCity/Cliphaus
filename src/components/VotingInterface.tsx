@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CONTRACT_ABIS, DEFAULT_CONTEST_CONFIG } from "./constants/contracts";
-import { useEthers } from "./provider/WalletProvider";
+import { useEthers } from "../hooks/useEthers";
 import { ethers, Contract } from "ethers";
 
 interface Proposal {
@@ -16,20 +16,28 @@ interface Proposal {
 interface VotingInterfaceProps {
   contestAddress: string;
   proposals: Proposal[];
+  initialProposalId?: number;
 }
 
 export const VotingInterface = ({
   contestAddress,
   proposals,
+  initialProposalId,
 }: VotingInterfaceProps) => {
   const [selectedProposal, setSelectedProposal] = useState<number | null>(null);
   const [voteCount, setVoteCount] = useState(1);
 
-  const { signer, address, isConnected } = useEthers();
+  const { signer, address } = useEthers();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
+
+  useEffect(() => {
+    if (initialProposalId !== undefined && initialProposalId !== null) {
+      setSelectedProposal(initialProposalId);
+    }
+  }, [initialProposalId]);
 
   const castVote = async () => {
     if (selectedProposal === null || voteCount < 1 || !signer) return;

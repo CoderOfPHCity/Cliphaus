@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@reown/appkit": "^1.8.14",
+    "@reown/appkit-adapter-ethers": "^1.8.14",
     "@types/three": "^0.181.0",
     "@wagmi/core": "^2.22.1",
     "ethers": "^6.15.0",

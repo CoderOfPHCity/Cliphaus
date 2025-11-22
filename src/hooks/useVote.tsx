@@ -3,7 +3,7 @@
 
 import { useCallback, useState } from "react";
 import { ethers, Contract } from "ethers";
-import { useEthers } from "../components/provider/WalletProvider";
+import { useEthers } from "./useEthers";
 import { useContestContext } from "./useContestContext";
 import {
   CONTRACT_ABIS,
@@ -39,6 +39,11 @@ export const useVote = () => {
       setTransactionHash(null);
 
       try {
+        // Validate contract address
+        if (!targetContest || !ethers.isAddress(targetContest)) {
+          throw new Error("Invalid contest address. Please select a valid contest.");
+        }
+
         const contestContract = new Contract(
           targetContest,
           CONTRACT_ABIS.MEME_CONTEST,

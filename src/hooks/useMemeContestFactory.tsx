@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { ethers, Contract } from "ethers";
-import { useEthers } from "../components/provider/WalletProvider";
+import { useEthers } from "./useEthers";
 import {
   CONTRACT_ADDRESSES,
   CONTRACT_ABIS,
@@ -31,6 +31,12 @@ export const useMemeContestFactory = () => {
     async (config: Partial<ContestConfig>) => {
       if (!signer || !address) {
         throw new Error("Wallet not connected");
+      }
+
+      if (!CONTRACT_ADDRESSES.MEME_CONTEST_FACTORY) {
+        throw new Error(
+          "Factory contract address not configured. Please set NEXT_PUBLIC_FACTORY_ADDRESS environment variable."
+        );
       }
 
       setIsLoading(true);

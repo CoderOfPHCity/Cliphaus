@@ -14,9 +14,10 @@ interface Proposal {
 
 interface ProposalCardProps {
   proposal: Proposal;
+  onVoteClick?: (proposal: Proposal) => void;
 }
 
-export const ProposalCard = ({ proposal }: ProposalCardProps) => {
+export const ProposalCard = ({ proposal, onVoteClick }: ProposalCardProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -116,7 +117,10 @@ export const ProposalCard = ({ proposal }: ProposalCardProps) => {
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        <button className="flex-1 aurora-gradient text-white py-3 px-4 rounded-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(136,68,255,0.5)]">
+        <button
+          onClick={() => onVoteClick?.(proposal)}
+          className="flex-1 aurora-gradient text-white py-3 px-4 rounded-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(136,68,255,0.5)]"
+        >
           Vote for this Meme
         </button>
         <button className="px-6 py-3 glass border border-white/20 rounded-lg hover:bg-white/10 transition-all duration-300 text-white font-semibold">

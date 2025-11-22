@@ -1,6 +1,6 @@
 "use client";
 
-import { useEthers } from "./provider/WalletProvider";
+import { useEthers } from "../hooks/useEthers";
 import { useEffect, useState } from "react";
 
 export const ConnectionStatus = () => {
