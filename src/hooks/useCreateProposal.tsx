@@ -1,7 +1,8 @@
 // hooks/useCreateProposal.tsx
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ethers, Contract } from "ethers";
 import { useEthers } from "../components/provider/WalletProvider";
 import { useContestContext } from "./useContestContext";
@@ -13,17 +14,19 @@ import {
 export const useCreateProposal = () => {
   const { signer, address } = useEthers();
   const { currentContest } = useContestContext();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [transactionHash, setTransactionHash] = useState<string | null>(null);
 
-  const createProposal = useCallback(
-    async (
-      description: string,
-      contentHash: string,
-      contestAddress?: string,
-    ) => {
-      // Use provided contestAddress or fall back to current context
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      description,
+      contentHash,
+      contestAddress,
+    }: {
+      description: string;
+      contentHash: string;
+      contestAddress?: string;
+    }) => {
       const targetContest = contestAddress || currentContest;
 
       if (!targetContest) {
@@ -38,44 +41,56 @@ export const useCreateProposal = () => {
         throw new Error("Description and content hash are required");
       }
 
-      setIsLoading(true);
-      setError(null);
-      setTransactionHash(null);
+      const contestContract = new Contract(
+        targetContest,
+        CONTRACT_ABIS.MEME_CONTEST,
+        signer,
+      );
 
-      try {
-        const contestContract = new Contract(
-          targetContest,
-          CONTRACT_ABIS.MEME_CONTEST,
-          signer,
-        );
+      const transaction = await contestContract.propose(
+        description,
+        contentHash,
+        { value: ethers.parseEther(DEFAULT_CONTEST_CONFIG.COST_TO_PROPOSE) },
+      );
 
-        const transaction = await contestContract.propose(
-          description,
-          contentHash,
-          { value: ethers.parseEther(DEFAULT_CONTEST_CONFIG.COST_TO_PROPOSE) },
-        );
-
-        setTransactionHash(transaction.hash);
-
-        // Wait for confirmation
-        const receipt = await transaction.wait();
-        setIsLoading(false);
-        return receipt;
-      } catch (err: any) {
-        console.error("Error creating proposal:", err);
-        setError(err.message || "Failed to create proposal");
-        setIsLoading(false);
-        throw err;
-      }
+      // Wait for confirmation
+      const receipt = await transaction.wait();
+      return {
+        receipt,
+        transactionHash: transaction.hash,
+        contestAddress: targetContest,
+      };
     },
-    [signer, address, currentContest],
+    onSuccess: (data) => {
+      // Invalidate and refetch proposals for this contest
+      queryClient.invalidateQueries({
+        queryKey: ["proposals", data.contestAddress],
+      });
+
+      // Also invalidate contest details to refresh proposal count
+      queryClient.invalidateQueries({
+        queryKey: ["contest", data.contestAddress],
+      });
+    },
+  });
+
+  const createProposal = useCallback(
+    async (
+      description: string,
+      contentHash: string,
+      contestAddress?: string,
+    ) => {
+      return mutation.mutateAsync({ description, contentHash, contestAddress });
+    },
+    [mutation],
   );
 
   return {
     createProposal,
-    isLoading,
-    error,
-    transactionHash,
+    isLoading: mutation.isPending,
+    error: mutation.error,
+    transactionHash: mutation.data?.transactionHash || null,
     currentContest,
+    isSuccess: mutation.isSuccess,
   };
 };

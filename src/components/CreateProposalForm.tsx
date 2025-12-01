@@ -90,7 +90,7 @@ export const CreateProposalForm = () => {
         {error && (
           <div className="p-3 bg-red-100 text-red-700 rounded-md">
             <p className="font-medium">Error</p>
-            <p className="text-sm">{error}</p>
+            <p className="text-sm">{error.message}</p>
           </div>
         )}
 

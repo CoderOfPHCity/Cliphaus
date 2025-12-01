@@ -4,6 +4,7 @@ import "./globals.css";
 import { WalletProvider } from "../components/provider/WalletProvider";
 import { Navigation } from "../components/Navigation";
 import { ContestProvider } from "../hooks/useContestContext";
+import ReactQueryProvider from "../components/provider/ReactQueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,12 +31,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <WalletProvider>
-          <ContestProvider>
-            <Navigation />
-            {children}
-          </ContestProvider>
-        </WalletProvider>
+        <ReactQueryProvider>
+          <WalletProvider>
+            <ContestProvider>
+              <Navigation />
+              {children}
+            </ContestProvider>
+          </WalletProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

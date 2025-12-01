@@ -19,7 +19,6 @@ export const useVote = () => {
 
   const vote = useCallback(
     async (proposalId: number, voteCount: number, contestAddress?: string) => {
-      // Use provided contestAddress or fall back to current context
       const targetContest = contestAddress || currentContest;
 
       if (!targetContest) {

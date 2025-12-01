@@ -1,167 +1,348 @@
 // src/app/contests/[id]/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { CreateProposalForm } from "../../../components/CreateProposalForm";
 import { VotingInterface } from "../../../components/VotingInterface";
 import { ProposalCard } from "../../../components/ProposalCard";
 import { useContestContext } from "../../../hooks/useContestContext";
-
-// Mock data - replace with actual contract calls
-const mockContest = {
-  id: 1,
-  address: "0x2dEb56795F4b86e1EfF814Fd7c2b60f4beE2612A",
-  title: "Best Crypto Meme 2024",
-  description:
-    "Submit your funniest crypto memes! The community will vote for the most hilarious and creative entries. Winners get ETH rewards and bragging rights!",
-  creator: "0xabcdef1234567890abcdef1234567890abcdef12",
-  proposalCount: 15,
-  totalVotes: 245,
-  endTime: Date.now() + 86400000, // 1 day from now
-  startTime: Date.now() - 86400000, // Started 1 day ago
-  status: "active" as const,
-};
-
-const mockProposals = [
-  {
-    id: 1,
-    author: "0x123...abc",
-    description: "When you see the gas fees...",
-    contentHash: "QmTest1",
-    votes: 45,
-    createdAt: Date.now() - 86400000,
-  },
-  {
-    id: 2,
-    author: "0x456...def",
-    description: "Trying to explain Bitcoin to family",
-    contentHash: "QmTest2",
-    votes: 32,
-    createdAt: Date.now() - 43200000,
-  },
-];
+import {
+  useContestDetails,
+  useContestProposals,
+} from "../../../hooks/useContestDetails";
 
 export default function ContestDetailPage() {
   const params = useParams();
-  const contestId = params.id;
+  const contestAddress = params.id as string;
   const [activeTab, setActiveTab] = useState<"proposals" | "submit" | "vote">(
     "proposals",
   );
+  const [selectedProposalId, setSelectedProposalId] = useState<string | null>(
+    null,
+  );
+  const [sortBy, setSortBy] = useState<"votes" | "recent">("votes");
+  const voteSectionRef = useRef<HTMLDivElement | null>(null);
 
   const { setCurrentContest } = useContestContext();
 
+  const {
+    data: contestData,
+    isLoading: contestLoading,
+    error: contestError,
+  } = useContestDetails(contestAddress);
+
+  const {
+    data: proposalsData,
+    isLoading: proposalsLoading,
+    error: proposalsError,
+    refetch: refetchProposals,
+  } = useContestProposals(contestAddress, sortBy);
+
+  const contest = contestData?.contest
+    ? {
+        id: parseInt(contestData.contest.contestId),
+        address: contestData.contest.address,
+        title: `Meme Contest #${contestData.contest.contestId}`,
+        description:
+          "Community-driven meme competition. Submit your best memes and let the community vote!",
+        creator: contestData.contest.creator,
+        proposalCount: contestData.contest.proposalCount,
+        totalVotes: contestData.contest.voteCount,
+        endTime:
+          parseInt(contestData.contest.contestStart) * 1000 +
+          parseInt(contestData.contest.votingPeriod) * 1000,
+        startTime: parseInt(contestData.contest.contestStart) * 1000,
+        status: "active" as const,
+      }
+    : null;
+
+  const proposals = proposalsData?.proposals || [];
+
+  const truncateAddress = (addr: string) => {
+    if (!addr) return "";
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
   useEffect(() => {
     // Set the current contest when page loads
-    setCurrentContest(mockContest.address);
-  }, [setCurrentContest]);
+    if (contestAddress) {
+      setCurrentContest(contestAddress);
+    }
+  }, [contestAddress, setCurrentContest]);
+
+  useEffect(() => {
+    if (activeTab === "vote") {
+      const timeout = setTimeout(() => {
+        voteSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 150);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [activeTab]);
+
+  const handleVoteClick = (proposalId: string) => {
+    setSelectedProposalId(proposalId);
+    setActiveTab("vote");
+  };
+
+  const handleVoteSubmitted = () => {
+    // Refetch both proposals and contest details after voting
+    refetchProposals();
+    setActiveTab("proposals");
+    setSelectedProposalId(null);
+  };
+
+  // Loading state
+  if (contestLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+            <p className="mt-4">Loading contest details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (contestError || !contest) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center text-red-400">
+            <h1 className="text-2xl font-bold mb-4">Contest Not Found</h1>
+            <p>
+              Error loading contest:{" "}
+              {contestError?.message || "Contest not found"}
+            </p>
+            <Link
+              href="/contests"
+              className="inline-block mt-4 px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Back to Contests
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+      {/* Contest Header */}
+      <div className="bg-gray-800 border-b border-gray-700">
+        <div className="max-w-6xl mx-auto p-8">
           <Link
             href="/contests"
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4"
+            className="inline-flex items-center text-blue-400 hover:text-blue-300 mb-6 transition-colors"
           >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Back to Contests
+            ← Back to Contests
           </Link>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {mockContest.title}
-                </h1>
-                <p className="text-gray-600">{mockContest.description}</p>
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold mb-2">{contest.title}</h1>
+              <p className="text-gray-300 mb-4">{contest.description}</p>
+
+              <div className="flex flex-wrap gap-6 text-sm">
+                <div>
+                  <span className="text-gray-400">Creator: </span>
+                  <span className="font-mono">
+                    {truncateAddress(contest.creator)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Proposals: </span>
+                  <span>{contest.proposalCount}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Total Votes: </span>
+                  <span>{contest.totalVotes}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Ends in: </span>
+                  <span>
+                    {Math.ceil(
+                      (contest.endTime - Date.now()) / (1000 * 60 * 60 * 24),
+                    )}{" "}
+                    days
+                  </span>
+                </div>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                Active
-              </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-              <div>
-                <span className="font-medium">Creator:</span>{" "}
-                {mockContest.creator}
-              </div>
-              <div>
-                <span className="font-medium">Proposals:</span>{" "}
-                {mockContest.proposalCount}
-              </div>
-              <div>
-                <span className="font-medium">Total Votes:</span>{" "}
-                {mockContest.totalVotes}
-              </div>
+            <div
+              className={`px-4 py-2 rounded-full font-medium ${
+                contest.status === "active"
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-600 text-gray-300"
+              }`}
+            >
+              {contest.status.charAt(0).toUpperCase() + contest.status.slice(1)}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-6">
-          <button
-            onClick={() => setActiveTab("proposals")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === "proposals"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            View Proposals
-          </button>
-          <button
-            onClick={() => setActiveTab("submit")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === "submit"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Submit Proposal
-          </button>
-          <button
-            onClick={() => setActiveTab("vote")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === "vote"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Vote
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === "proposals" && (
-          <div className="space-y-4">
-            {mockProposals.map((proposal) => (
-              <ProposalCard key={proposal.id} proposal={proposal} />
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-700">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="flex space-x-8">
+            {[
+              { id: "proposals" as const, label: "Proposals" },
+              { id: "submit" as const, label: "Submit Proposal" },
+              { id: "vote" as const, label: "Vote" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id !== "vote") {
+                    setSelectedProposalId(null);
+                  }
+                }}
+                className={`py-4 px-1 border-b-2 font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? "border-blue-500 text-blue-400"
+                    : "border-transparent text-gray-400 hover:text-gray-300"
+                }`}
+              >
+                {tab.label}
+                {tab.id === "proposals" && (
+                  <span className="ml-2 bg-gray-700 px-2 py-1 rounded-full text-xs">
+                    {proposals.length}
+                  </span>
+                )}
+              </button>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="max-w-6xl mx-auto p-8">
+        {activeTab === "proposals" && (
+          <div>
+            {/* Sort Controls */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Proposals</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSortBy("votes")}
+                  className={`px-4 py-2 rounded-lg ${
+                    sortBy === "votes"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  }`}
+                >
+                  Most Votes
+                </button>
+                <button
+                  onClick={() => setSortBy("recent")}
+                  className={`px-4 py-2 rounded-lg ${
+                    sortBy === "recent"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  }`}
+                >
+                  Most Recent
+                </button>
+              </div>
+            </div>
+
+            {/* Proposals List */}
+            {proposalsLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+                <p className="mt-2">Loading proposals...</p>
+              </div>
+            ) : proposalsError ? (
+              <div className="text-center text-red-400 py-8">
+                <p>Error loading proposals: {proposalsError.message}</p>
+                <button
+                  onClick={() => refetchProposals()}
+                  className="mt-2 px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : proposals.length > 0 ? (
+              <div className="grid gap-6">
+                {proposals.map((proposal) => (
+                  <ProposalCard
+                    key={proposal.id}
+                    proposal={proposal}
+                    onVoteClick={() => handleVoteClick(proposal.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-lg">No proposals yet.</p>
+                <button
+                  onClick={() => setActiveTab("submit")}
+                  className="mt-4 px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Be the first to submit!
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        {activeTab === "submit" && <CreateProposalForm />}
+        {activeTab === "submit" && (
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6">Submit Proposal</h2>
+            <CreateProposalForm />
+            <button
+              onClick={() => setActiveTab("proposals")}
+              className="mt-6 px-4 py-2 bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Back to Proposals
+            </button>
+          </div>
+        )}
 
         {activeTab === "vote" && (
-          <VotingInterface
-            contestAddress={mockContest.address}
-            proposals={mockProposals}
-          />
+          <div ref={voteSectionRef}>
+            <h2 className="text-2xl font-bold mb-6">Cast Your Vote</h2>
+
+            {/* Show selected proposal info if available */}
+            {selectedProposalId && (
+              <div className="mb-6 p-4 bg-gray-800 rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">
+                  Voting on Proposal #{selectedProposalId}
+                </h3>
+                <p className="text-gray-300">
+                  You selected to vote on proposal #{selectedProposalId}. Cast
+                  your vote below.
+                </p>
+              </div>
+            )}
+
+            {/* Voting Interface with correct props */}
+            <VotingInterface
+              contestAddress={contestAddress}
+              proposals={proposals}
+            />
+
+            <button
+              onClick={() => {
+                setActiveTab("proposals");
+                setSelectedProposalId(null);
+              }}
+              className="mt-6 px-4 py-2 bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Back to Proposals
+            </button>
+          </div>
         )}
       </div>
     </div>

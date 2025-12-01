@@ -6,7 +6,7 @@ import { useEthers } from "./provider/WalletProvider";
 import { ethers, Contract } from "ethers";
 
 interface Proposal {
-  id: number;
+  id: string;
   author: string;
   description: string;
   contentHash: string;
@@ -22,10 +22,10 @@ export const VotingInterface = ({
   contestAddress,
   proposals,
 }: VotingInterfaceProps) => {
-  const [selectedProposal, setSelectedProposal] = useState<number | null>(null);
+  const [selectedProposal, setSelectedProposal] = useState<string | null>(null);
   const [voteCount, setVoteCount] = useState(1);
 
-  const { signer, address, isConnected } = useEthers();
+  const { signer, address } = useEthers();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
@@ -39,19 +39,24 @@ export const VotingInterface = ({
     setIsConfirmed(false);
 
     try {
-      const voteCost =
-        parseFloat(DEFAULT_CONTEST_CONFIG.COST_TO_VOTE) * voteCount;
-
       const contestContract = new Contract(
         contestAddress,
         CONTRACT_ABIS.MEME_CONTEST,
         signer,
       );
+      console.log(
+        "Debug - Proposal ID:",
+        selectedProposal,
+        "Type:",
+        typeof selectedProposal,
+        "Vote Count:",
+        voteCount,
+      );
 
       const transaction = await contestContract.castVote(
         BigInt(selectedProposal),
         BigInt(voteCount),
-        { value: ethers.parseEther(voteCost.toString()) },
+        { value: 0 },
       );
 
       setTransactionHash(transaction.hash);
@@ -78,7 +83,7 @@ export const VotingInterface = ({
           </label>
           <select
             value={selectedProposal || ""}
-            onChange={(e) => setSelectedProposal(Number(e.target.value))}
+            onChange={(e) => setSelectedProposal(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Choose a proposal...</option>

@@ -1,7 +1,17 @@
-import type { NextConfig } from "next";
+// next.config.js
 
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // ... other configurations ...
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/indexer/:path*',
+        destination: 'https://meme-indexer-production.up.railway.app/:path*',
+      },
+    ];
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

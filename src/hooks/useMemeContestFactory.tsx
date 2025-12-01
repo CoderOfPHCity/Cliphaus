@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ethers, Contract } from "ethers";
 import { useEthers } from "../components/provider/WalletProvider";
 import {
@@ -23,6 +24,7 @@ export interface ContestConfig {
 
 export const useMemeContestFactory = () => {
   const { signer, address } = useEthers();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
@@ -99,6 +101,10 @@ export const useMemeContestFactory = () => {
         // Wait for confirmation
         const receipt = await transaction.wait();
 
+        queryClient.invalidateQueries({
+          queryKey: ["contests"],
+        });
+
         setIsLoading(false);
         return receipt;
       } catch (err: any) {
@@ -108,7 +114,7 @@ export const useMemeContestFactory = () => {
         throw err;
       }
     },
-    [signer, address],
+    [signer, address, queryClient],
   );
 
   return {

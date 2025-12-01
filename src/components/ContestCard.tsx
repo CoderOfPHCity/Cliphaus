@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useContestContext } from "../hooks/useContestContext";
 
 export interface Contest {
@@ -26,7 +26,34 @@ export const ContestCard = ({ contest }: ContestCardProps) => {
   const [contestStatus, setContestStatus] = useState<
     "upcoming" | "active" | "voting" | "completed"
   >("active");
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const { setCurrentContest } = useContestContext();
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -69,7 +96,7 @@ export const ContestCard = ({ contest }: ContestCardProps) => {
     };
 
     calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 60000); // Update every minute
+    const timer = setInterval(calculateTimeLeft, 60000);
 
     return () => clearInterval(timer);
   }, [contest.endTime, contest.startTime]);
@@ -79,36 +106,47 @@ export const ContestCard = ({ contest }: ContestCardProps) => {
   };
 
   const getStatusBadge = () => {
-    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
+    const baseClasses =
+      "px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm";
 
     switch (contestStatus) {
       case "upcoming":
         return (
-          <span className={`${baseClasses} bg-blue-100 text-blue-800`}>
+          <span
+            className={`${baseClasses} bg-blue-500/20 text-blue-300 border border-blue-400/30`}
+          >
             Upcoming
           </span>
         );
       case "active":
         return (
-          <span className={`${baseClasses} bg-green-100 text-green-800`}>
+          <span
+            className={`${baseClasses} bg-green-500/20 text-green-300 border border-green-400/30 aurora-glow`}
+          >
             Active
           </span>
         );
       case "voting":
         return (
-          <span className={`${baseClasses} bg-purple-100 text-purple-800`}>
+          <span
+            className={`${baseClasses} bg-purple-500/20 text-purple-300 border border-purple-400/30`}
+          >
             Voting
           </span>
         );
       case "completed":
         return (
-          <span className={`${baseClasses} bg-gray-100 text-gray-800`}>
+          <span
+            className={`${baseClasses} bg-gray-500/20 text-gray-300 border border-gray-400/30`}
+          >
             Completed
           </span>
         );
       default:
         return (
-          <span className={`${baseClasses} bg-gray-100 text-gray-800`}>
+          <span
+            className={`${baseClasses} bg-gray-500/20 text-gray-300 border border-gray-400/30`}
+          >
             Active
           </span>
         );
@@ -128,24 +166,32 @@ export const ContestCard = ({ contest }: ContestCardProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200">
+    <div
+      ref={cardRef}
+      className={`glass-strong rounded-xl overflow-hidden border border-white/10 card-hover group ${
+        isVisible ? "slide-in-up" : "opacity-0"
+      }`}
+      style={{
+        boxShadow: "0 8px 32px 0 rgba(0, 255, 136, 0.1)",
+      }}
+    >
       {/* Header with Status */}
-      <div className="flex justify-between items-start p-4 border-b border-gray-100">
+      <div className="flex justify-between items-start p-5 border-b border-white/10">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
+          <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:aurora-gradient-text transition-all duration-300">
             {contest.title}
           </h3>
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="text-sm text-gray-400 mb-2 font-mono">
             by {truncateAddress(contest.creator)}
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
           {getStatusBadge()}
           <span
-            className={`text-sm font-medium ${
+            className={`text-sm font-semibold ${
               contestStatus === "completed"
-                ? "text-gray-500"
-                : "text-orange-600"
+                ? "text-gray-400"
+                : "text-[var(--aurora-cyan)]"
             }`}
           >
             {timeLeft}
@@ -154,17 +200,17 @@ export const ContestCard = ({ contest }: ContestCardProps) => {
       </div>
 
       {/* Description */}
-      <div className="p-4">
-        <p className="text-gray-700 text-sm mb-4">
+      <div className="p-5">
+        <p className="text-gray-300 text-sm mb-4 leading-relaxed">
           {truncateDescription(contest.description)}
         </p>
 
         {/* Stats */}
-        <div className="flex justify-between items-center text-sm text-gray-600">
+        <div className="flex justify-between items-center text-sm text-gray-400">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 group/stat">
               <svg
-                className="w-4 h-4"
+                className="w-5 h-5 text-[var(--aurora-purple)] group-hover/stat:scale-110 transition-transform"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -176,11 +222,13 @@ export const ContestCard = ({ contest }: ContestCardProps) => {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <span>{contest.proposalCount} proposals</span>
+              <span className="font-medium">
+                {contest.proposalCount} proposals
+              </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 group/stat">
               <svg
-                className="w-4 h-4"
+                className="w-5 h-5 text-[var(--aurora-cyan)] group-hover/stat:scale-110 transition-transform"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -189,32 +237,32 @@ export const ContestCard = ({ contest }: ContestCardProps) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
                 />
               </svg>
-              <span>{contest.totalVotes} votes</span>
+              <span className="font-medium">{contest.totalVotes} votes</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Action Button */}
-      <div className="px-4 pb-4">
+      <div className="px-5 pb-5">
         <Link
-          href={`/contests/${contest.id}`}
+          href={`/contests/${contest.address}`}
           onClick={handleSelectContest}
-          className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors block"
+          className="w-full aurora-gradient text-white text-center py-3 px-4 rounded-lg font-semibold block transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(0,255,136,0.5)]"
         >
           {contestStatus === "completed" ? "View Results" : "View Contest"}
         </Link>
       </div>
 
-      {/* Progress Bar (optional) */}
+      {/* Progress Bar */}
       {contestStatus !== "completed" && (
-        <div className="px-4 pb-4">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="px-5 pb-5">
+          <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+              className="aurora-gradient h-2 rounded-full transition-all duration-500"
               style={{
                 width: `${Math.min(100, (contest.totalVotes / Math.max(contest.proposalCount * 10, 1)) * 100)}%`,
               }}
