@@ -162,31 +162,40 @@ export const contestsApi = {
     statusFilter: "all" | "active" | "completed" = "all",
   ): Promise<{ contests: Contest[]; totalPages: number; total: number }> => {
     try {
-      let stateParam: number | undefined;
+      // let stateParam: number | undefined;
 
-      // Map status filter to backend state
-      if (statusFilter === "active") {
-        stateParam = 1;
-      } else if (statusFilter === "completed") {
-        stateParam = 2;
-      }
+      // // Map status filter to backend state
+      // if (statusFilter === "active") {
+      //   stateParam = 1;
+      // } else if (statusFilter === "completed") {
+      //   stateParam = 2;
+      // }
+
+      // const params: any = { page, limit };
+      // if (stateParam !== undefined) {
+      //   params.state = stateParam;
+      // }
 
       const params: any = { page, limit };
-      if (stateParam !== undefined) {
-        params.state = stateParam;
-      }
+
 
       const response = await api.get<ApiResponse<BackendContest[]>>(
         "/contests",
         { params },
       );
 
-      const contests = response.data.data.map(transformContest);
+      const allContests = response.data.data.map(transformContest);
 
+      // Filter by status based on time calculation
+      const filteredContests = allContests.filter(contest => {
+        if (statusFilter === "all") return true;
+        return contest.status === statusFilter;
+      });
+      
       return {
-        contests,
+        contests: filteredContests,
         totalPages: response.data.pagination?.pages || 1,
-        total: response.data.pagination?.total || contests.length,
+        total: filteredContests.length,
       };
     } catch (error) {
       console.error("Error fetching contests:", error);
