@@ -178,7 +178,6 @@ export const contestsApi = {
 
       const params: any = { page, limit };
 
-
       const response = await api.get<ApiResponse<BackendContest[]>>(
         "/contests",
         { params },
@@ -187,11 +186,11 @@ export const contestsApi = {
       const allContests = response.data.data.map(transformContest);
 
       // Filter by status based on time calculation
-      const filteredContests = allContests.filter(contest => {
+      const filteredContests = allContests.filter((contest) => {
         if (statusFilter === "all") return true;
         return contest.status === statusFilter;
       });
-      
+
       return {
         contests: filteredContests,
         totalPages: response.data.pagination?.pages || 1,

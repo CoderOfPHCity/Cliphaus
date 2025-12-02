@@ -1,10 +1,22 @@
 "use client";
 
+import { ConnectButton } from "thirdweb/react";
+import { createThirdwebClient } from "thirdweb";
+import { createWallet } from "thirdweb/wallets";
 import { useEthers } from "./provider/WalletProvider";
 
+const client = createThirdwebClient({
+  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "",
+});
+
+const wallets = [
+  createWallet("io.metamask"),
+  createWallet("com.coinbase.wallet"),
+  createWallet("walletConnect"),
+];
+
 export const WalletConnect = () => {
-  const { address, isConnected, connectWallet, disconnectWallet, isLoading } =
-    useEthers();
+  const { address, isConnected, disconnectWallet, isLoading } = useEthers();
 
   const truncateAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -19,23 +31,26 @@ export const WalletConnect = () => {
             {truncateAddress(address)}
           </span>
         </div>
-        <button
-          onClick={disconnectWallet}
-          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
-        >
-          Disconnect
-        </button>
+        <ConnectButton
+          client={client}
+          wallets={wallets}
+          connectButton={{
+            label: truncateAddress(address),
+          }}
+        />
       </div>
     );
   }
 
   return (
-    <button
-      onClick={connectWallet}
-      disabled={isLoading}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-    >
-      {isLoading ? "Connecting..." : "Connect Wallet"}
-    </button>
+    <ConnectButton
+      client={client}
+      wallets={wallets}
+      connectButton={{
+        className:
+          "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors",
+        label: "Connect Wallet",
+      }}
+    />
   );
 };

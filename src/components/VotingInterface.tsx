@@ -126,7 +126,6 @@ export const VotingInterface = ({
           disabled={isLoading || !address || selectedProposal === null}
           className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          // Update button text
           {!address
             ? "Connect Wallet"
             : isLoading

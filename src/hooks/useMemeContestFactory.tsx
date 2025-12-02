@@ -9,6 +9,8 @@ import {
 } from "../components/constants/contracts";
 
 export interface ContestConfig {
+  title: string;
+  description: string;
   contestStart: number;
   votingDelay: number;
   votingPeriod: number;
@@ -41,6 +43,8 @@ export const useMemeContestFactory = () => {
 
       try {
         const fullConfig: ContestConfig = {
+          title:DEFAULT_CONTEST_CONFIG.TITLE,
+          description:DEFAULT_CONTEST_CONFIG.DESCRIPTION,
           contestStart:
             Math.floor(Date.now() / 1000) +
             DEFAULT_CONTEST_CONFIG.CONTEST_START_DELAY,
@@ -64,6 +68,8 @@ export const useMemeContestFactory = () => {
 
         // Convert to tuple format expected by ethers
         const contestConfig = [
+          fullConfig.title,
+          fullConfig.description,
           fullConfig.contestStart,
           fullConfig.votingDelay,
           fullConfig.votingPeriod,
