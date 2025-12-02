@@ -44,9 +44,11 @@ export default function ContestDetailPage() {
     ? {
         id: parseInt(contestData.contest.contestId),
         address: contestData.contest.address,
-        title: `Meme Contest #${contestData.contest.contestId}`,
-        description:
-          "Community-driven meme competition. Submit your best memes and let the community vote!",
+        // title: `Meme Contest #${contestData.contest.contestId}`,
+        // description:
+        //   "Community-driven meme competition. Submit your best memes and let the community vote!",
+        title: contestData.contest.title || `Meme Contest #${contestData.contest.contestId}`,
+        description: contestData.contest.description || "Community-driven meme competition. Submit your best memes and let the community vote!",
         creator: contestData.contest.creator,
         proposalCount: contestData.contest.proposalCount,
         totalVotes: contestData.contest.voteCount,

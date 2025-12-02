@@ -25,6 +25,8 @@ interface BackendContest {
   id: string;
   address: string;
   contestId: string;
+  title: string;                 
+  description: string; 
   creator: string;
   contestStart: string;
   votingPeriod: string;
@@ -128,9 +130,8 @@ function transformContest(backendContest: BackendContest): Contest {
   return {
     id: parseInt(backendContest.contestId),
     address: backendContest.address,
-    title: `Meme Contest #${backendContest.contestId}`,
-    description:
-      "Community-driven meme competition. Submit your best memes and let the community vote!",
+    title: backendContest.title || `mEME Contest #${backendContest.contestId}`, 
+    description: backendContest.description || "Submit your best memes and let the community vote!", 
     creator: backendContest.creator,
     proposalCount: backendContest.proposalCount,
     totalVotes: backendContest.voteCount,
