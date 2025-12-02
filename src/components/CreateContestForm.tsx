@@ -8,7 +8,7 @@ import { ethers } from "ethers";
 export const CreateContestForm = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [votingPeriod, setVotingPeriod] = useState(7); // days
+  const [votingPeriod, setVotingPeriod] = useState(2); // days
   const [costToPropose, setCostToPropose] = useState("0.01");
   const [costToVote, setCostToVote] = useState("0.001");
   const [maxProposals, setMaxProposals] = useState(100);
@@ -32,6 +32,8 @@ export const CreateContestForm = () => {
     e.preventDefault();
 
     createContest({
+      title,                   
+      description, 
       votingPeriod: votingPeriod * 24 * 60 * 60,
       costToPropose: ethers.parseEther(costToPropose),
       costToVote: ethers.parseEther(costToVote),
